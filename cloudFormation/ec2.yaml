@@ -1,0 +1,52 @@
+Description:
+  Script to deploy security group and EC2 instance using Cloudformation
+Resources:
+  mySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to client host
+      VpcId: vpc-0a354c2d9d2ac030d
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+  TestInstances:
+    Type: AWS::EC2::Instance
+    Properties: 
+
+      AvailabilityZone: us-west-2a
+     
+      ImageId: ami-0497e51c56f8ea7da
+      InstanceType: t2.medium
+      KeyName: udacity
+
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: true
+          DeviceIndex: "0"
+          GroupSet: 
+            - !Ref mySecurityGroup
+          SubnetId: subnet-096fb96efbfb597b1
+ 
+      # SecurityGroups: 
+      #   - !Ref mySecurityGroup
+      # SubnetId: subnet-096fb96efbfb597b1
+
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          apt update -y
+          apt install -y apache2
+          systemctl start apache2
+
+      # Volumes: 
+      #   - Volume
